@@ -1,67 +1,65 @@
 package io.libsoft.gadraw;
 
-import java.io.ByteArrayInputStream;
-import java.util.Arrays;
+import io.libsoft.gadraw.controller.DrawController;
 import java.util.Random;
-import javafx.animation.AnimationTimer;
+import java.util.ResourceBundle;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 
 public class Main extends Application {
 
 
+  private static final String LAYOUT_RESOURCE = "gadraw.fxml";
+  private static final String RESOURCE_BUNDLE = "strings";
   private static Random random;
 
-  public static void main(String[] args)  {
+  static {
     nu.pattern.OpenCV.loadShared();
-    random = new Random();
-    launch();
-
-
-
   }
 
+  private DrawController controller;
 
-  public static Image getImage(Mat mat) {
-    MatOfByte byteMat = new MatOfByte();
-    Imgcodecs.imencode(".bmp", mat, byteMat);
-    return new Image(new ByteArrayInputStream(byteMat.toArray()));
+
+  public static void main(String[] args) {
+    launch(args);
   }
 
+  /**
+   * Loads FXML layout, resource bundle, and icon used by application.
+   *
+   * @param stage primary application window.
+   * @throws Exception if a required resource cannot be loaded.
+   */
+  @Override
   public void start(Stage stage) throws Exception {
-
-    final ImageView root = new ImageView();
-    Scene scene = new Scene(new StackPane(root));
-    final Mat mat2 = Mat.zeros(new Size(200, 200), CvType.CV_8SC3);
-    System.out.println(Arrays.toString(mat2.get(0, 0)));
-
-    AnimationTimer animationTimer = new AnimationTimer() {
-      @Override
-      public void handle(long now) {
-        for (int k = 0; k < 10; k++) {
-          for (int i = 0; i < mat2.cols(); i++) {
-            for (int j = 0; j < mat2.rows(); j++) {
-              byte[] b = {0, 0, 0};
-              random.nextBytes(b);
-              mat2.put(j, i, b);
-            }
-          }
-          root.setImage(getImage(mat2));
-        }
-      }
-    };
-
+    ClassLoader classLoader = getClass().getClassLoader();
+    ResourceBundle bundle = ResourceBundle.getBundle(RESOURCE_BUNDLE);
+    FXMLLoader fxmlLoader = new FXMLLoader(classLoader.getResource(LAYOUT_RESOURCE), bundle);
+    Parent root = fxmlLoader.load();
+    controller = fxmlLoader.getController();
+    Scene scene = new Scene(root);
+    stage.setResizable(true);
     stage.setScene(scene);
+    stage.sizeToScene();
     stage.show();
-    animationTimer.start();
+    setStageSize(stage, root);
   }
+
+
+  @Override
+  public void stop() throws Exception {
+    controller.stop();
+    super.stop();
+  }
+
+  private void setStageSize(Stage stage, Parent root) {
+    Bounds bounds = root.getLayoutBounds();
+    stage.setMinWidth(root.minWidth(-1) + stage.getWidth() - bounds.getWidth());
+    stage.setMinHeight(root.minHeight(-1) + stage.getHeight() - bounds.getHeight());
+  }
+
 }

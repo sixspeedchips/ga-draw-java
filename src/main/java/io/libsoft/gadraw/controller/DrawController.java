@@ -2,7 +2,6 @@ package io.libsoft.gadraw.controller;
 
 import io.libsoft.gadraw.model.Environment;
 import io.libsoft.gadraw.view.GenerationViewer;
-import java.io.IOException;
 import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,7 +15,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 public class DrawController {
 
 
-  private static final long MS_SLEEP = 1000;
+  private static final long MS_SLEEP = 0;
   @FXML
   public ToggleButton toggleRun;
   @FXML
@@ -35,17 +34,13 @@ public class DrawController {
 
 
   @FXML
-  private void initialize() throws IOException {
-//    ClassLoader classLoader = getClass().getClassLoader();
-//    FXMLLoader fxmlLoader = new FXMLLoader(classLoader.getResource("viewer.fxml"));
-//    generationViewer = fxmlLoader.load();
+  private void initialize() {
 
-    environment = new Environment();
+    environment = new Environment(
+        Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\lonamisa.jpg",
+            Imgcodecs.CV_LOAD_IMAGE_COLOR),
+        new Size(500, 500));
 
-//    Mat mat = Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\lonamisa.jpg", Imgcodecs.CV_LOAD_IMAGE_ANYCOLOR);
-    environment.setTarget(
-        Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\lonamisa.jpg"),
-        new Size(400, 400));
     generationViewer.setEnvironment(environment);
     updater = new Updater();
     reset(null);

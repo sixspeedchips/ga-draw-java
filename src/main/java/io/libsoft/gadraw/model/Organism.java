@@ -1,9 +1,9 @@
 package io.libsoft.gadraw.model;
 
-import java.util.Collections;
-import java.util.LinkedList;
+import java.security.SecureRandom;
 import java.util.Random;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
@@ -13,49 +13,95 @@ import org.opencv.imgproc.Imgproc;
 
 public class Organism {
 
-  private static Random random = new Random();
-  private static Mat calc = new Mat();
+  private static Random random = new SecureRandom();
+  private Mat calc;
   private Mat body;
-  private byte[][] genes;
-  private double mutationRate = .03;
+  private long[][] genes;
+  private double mutationRate = .1;
   private double fitness;
   private Size size;
+  private MatOfPoint expression;
+  private Scalar color;
+  private Point p1;
+  private Point p2;
+  private Point p3;
+  private Mat target;
 
-  public Organism(int noGenes, Size size) {
-    this.size = size;
-    // todo change to accept parent genes
-    genes = new LinkedList<>();
+  public Organism(int noGenes, Mat target) {
+    this.target = target;
+    this.size = target.size();
+    expression = new MatOfPoint();
+    color = new Scalar(0, 0, 0);
+    genes = new long[noGenes][10];
+    body = new Mat(size, CvType.CV_8UC3);
+    calc = new Mat(size, CvType.CV_8UC3);
+    p1 = new Point();
+    p2 = new Point();
+    p3 = new Point();
+
+    newGenes(noGenes, size);
+  }
+
+  private void newGenes(int noGenes, Size size) {
     for (int i = 0; i < noGenes; i++) {
-      genes.add(new Gene(size));
+      // colors
+//      genes[i][0] = random.nextInt(255);
+//      genes[i][1] = random.nextInt(255);
+//      genes[i][2] = random.nextInt(255);
+      genes[i][0] = 128;
+      genes[i][1] = 128;
+      genes[i][2] = 128;
+
+      int x = random.nextInt((int) size.width);
+      int y = random.nextInt((int) size.height);
+//      genes[i][3] = random.nextInt((int) size.width);
+//      genes[i][4] = random.nextInt((int) size.height);
+//
+//      genes[i][5] = random.nextInt((int) size.width);
+//      genes[i][6] = random.nextInt((int) size.height);
+//
+//      genes[i][7] = random.nextInt((int) size.width);
+//      genes[i][8] = random.nextInt((int) size.height);
+      genes[i][3] = x;
+      genes[i][4] = y;
+
+      genes[i][5] = x;
+      genes[i][6] = y;
+
+      genes[i][7] = x;
+      genes[i][8] = y;
+
+      genes[i][9] = random.nextInt(10);
+
     }
   }
 
-  public Organism(Size size) {
-    this.size = size;
-    genes = new LinkedList<>();
-  }
 
-
-  public void express() {
-
-    clear(body);
-    for (Gene gene : genes) {
-      Imgproc.fillPoly(body, Collections.singletonList(gene.loci), gene.color);
+  public void computeFitness() {
+    Core.multiply(body, Scalar.all(0), body);
+//    body.release();
+//    body = Mat.zeros(size, CvType.CV_8UC3);
+//    shuffle(genes);
+    for (long[] gene : genes) {
+      color.set(new double[]{(double) gene[0], (double) gene[1], (double) gene[2]});
+      p1.set(new double[]{gene[3], gene[4]});
+      p2.set(new double[]{gene[5], gene[6]});
+      p3.set(new double[]{gene[7], gene[8]});
+      expression.fromArray(p1, p2, p3);
+      Imgproc.fillConvexPoly(body, expression, color);
+//      Imgproc.rectangle(body, p1, p2, color, (int) gene[9]);
     }
-  }
-
-  private void clear(Mat body) {
-    for (int i = 0; i < body.cols(); i++) {
-      for (int j = 0; j < body.rows(); j++) {
-        body.put(j, i, new byte[]{0, 0, 0});
-      }
+    Core.absdiff(target, body, calc);
+    Core.multiply(calc, calc, calc);
+    fitness = 0;
+    for (double v : Core.sumElems(calc).val) {
+      fitness += v;
     }
+
+//    fitness = Core.norm(calc, Core.NORM_L2);
+//    fitness = norm(target,body);
   }
 
-  public void computeFitness(Mat target) {
-    Core.subtract(target, body, calc);
-    fitness = Core.norm(calc, Core.NORM_L2);
-  }
 
   public double getFitness() {
     return fitness;
@@ -66,98 +112,69 @@ public class Organism {
   }
 
   public void mutate() {
-    for (Gene gene : genes) {
-      gene.color = Gene.newColor(gene.color, mutationRate);
-      gene.loci = Gene.newLoci(gene.loci, mutationRate, size);
+    for (long[] gene : genes) {
+      double r = 5;
+
+      if (random.nextDouble() < mutationRate) {
+        gene[0] = Math.round(gene[0] + random.nextDouble() * r * 2 - r);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[1] = Math.round(gene[1] + random.nextDouble() * r * 2 - r);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[2] = Math.round(gene[2] + random.nextDouble() * r * 2 - r);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[3] = Math.round(gene[3] + random.nextDouble() * r - r / 2);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[4] = Math.round(gene[4] + random.nextDouble() * r - r / 2);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[5] = Math.round(gene[5] + random.nextDouble() * r - r / 2);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[6] = Math.round(gene[6] + random.nextDouble() * r - r / 2);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[7] = Math.round(gene[7] + random.nextDouble() * r - r / 2);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[8] = Math.round(gene[8] + random.nextDouble() * r - r / 2);
+      }
+      if (random.nextDouble() < mutationRate) {
+        gene[9] = Math.round(gene[9] + random.nextDouble() * r - r / 2);
+      }
+
+
     }
+
+//    for (int i = 0; i < genes.length - 1; i++) {
+//      if (random.nextDouble() < mutationRate) {
+//        swap(i);
+//      }
+//    }
   }
 
-  @Override
-  public String toString() {
-    return "Organism{" +
-        "body=" + body +
-        ", genes=" + genes +
-        ", mutationRate=" + mutationRate +
-        ", fitness=" + fitness +
-        ", size=" + size +
-        '}';
+  private void swap(int i) {
+    long[] temp = genes[i];
+    genes[i] = genes[i + 1];
+    genes[i + 1] = temp;
+
   }
+
 
   public void update(Organism p1, Organism p2) {
-    for (int i = 0; i < p1.genes.size(); i++) {
-      genes.get(i).update(Gene.combGene(p1.genes.get(i), p2.genes.get(i)));
+    int split = random.nextInt(p1.genes.length);
+    for (int i = 0; i < split; i++) {
+      genes[i] = p1.genes[i].clone();
     }
+    for (int i = split; i < p1.genes.length; i++) {
+      genes[i] = p2.genes[i].clone();
+    }
+
 
   }
 
-  private static class Gene {
 
-    private Scalar color;
-    private MatOfPoint loci;
-
-    public Gene(Size size) {
-
-      color = new Scalar();
-      Point[] points = new Point[3];
-      // new polygon, with 3 points
-      double x = random.nextDouble() * size.width;
-      double y = random.nextDouble() * size.height;
-      for (int i = 0; i < 3; i++) {
-        points[i] = new Point(x, y);
-      }
-      loci = new MatOfPoint(points);
-    }
-
-
-    public static Scalar newColor(Scalar color, double rate) {
-
-      int c1 = (int) color.val[0];
-      int c2 = (int) color.val[1];
-      int c3 = (int) color.val[2];
-
-      if (random.nextDouble() < rate) {
-        c1 = (int) Math.max(0, Math.min(color.val[0] + (random.nextInt(4) - 2), 255));
-      }
-      if (random.nextDouble() < rate) {
-        c1 = (int) Math.max(0, Math.min(color.val[1] + (random.nextInt(4) - 2), 255));
-      }
-      if (random.nextDouble() < rate) {
-        c1 = (int) Math.max(0, Math.min(color.val[2] + (random.nextInt(4) - 2), 255));
-      }
-
-      return new Scalar(c1, c2, c3);
-    }
-
-    public static MatOfPoint newLoci(MatOfPoint loci, double rate, Size size) {
-      Point[] points = new Point[3];
-      // new polygon, with 3 points
-
-      for (int i = 0; i < 3; i++) {
-        if (random.nextDouble() < rate) {
-          points[i] = new Point(
-              Math.max(0,
-                  Math.min(loci.toArray()[i].x + (random.nextDouble() * 6) - 3, size.width)),
-              Math.max(0,
-                  Math.min(loci.toArray()[i].y + (random.nextDouble() * 6) - 3, size.height)));
-
-        } else {
-          points[i] = loci.toArray()[i];
-        }
-      }
-      loci.release();
-      return new MatOfPoint(points);
-    }
-
-    public Scalar getColor() {
-      return color;
-    }
-
-    public MatOfPoint getLoci() {
-      return loci;
-    }
-
-    public void update(Gene combGene) {
-
-    }
-  }
 }

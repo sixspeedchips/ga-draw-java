@@ -24,12 +24,12 @@ public class GenerationViewer extends Pane {
     original = new ImageView();
     best = new ImageView();
     getChildren().addAll(new HBox(original, best));
+    byteMat = new MatOfByte();
 
   }
 
   public void setEnvironment(Environment environment) {
     this.environment = environment;
-    //todo fix this order can be dangerous
     original.setImage(getImage(environment.getTarget()));
 
   }
@@ -42,7 +42,6 @@ public class GenerationViewer extends Pane {
 
 
   private Image getImage(Mat mat) {
-    byteMat = new MatOfByte();
     Imgcodecs.imencode(".bmp", mat, byteMat);
     return new Image(new ByteArrayInputStream(byteMat.toArray()));
   }

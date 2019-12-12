@@ -46,14 +46,13 @@ public class Generation {
 
     for (Organism organism : organisms) {
       organism.computeFitness();
+      organism.mutate();
     }
     organisms.sort(Comparator.comparingDouble(Organism::getFitness));
 
-    // keep only top 20% of fitness
     int s = (int) (populationTarget * .4);
     for (int i = s; i < populationTarget; i++) {
       organisms.get(i).update(organisms.get(parent(s)), organisms.get(parent(s)));
-      organisms.get(i).mutate();
     }
   }
 

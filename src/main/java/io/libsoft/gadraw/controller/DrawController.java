@@ -29,6 +29,7 @@ public class DrawController {
   public GenerationViewer generationViewer;
   public Label fitness;
   public Label generation;
+  public Label mutationRate;
 
   private int iterations;
   private boolean running;
@@ -47,16 +48,19 @@ public class DrawController {
   private void initEnv() {
     environment = new Environment(
 //        Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\lonamisa.jpg",
-        Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\monalisa.jpg",
-//        Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\blackwhite.jpg",
+//        Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\leela.jpg",
+//        Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\monalisa.jpg",
+        Imgcodecs.imread("E:\\Projects\\JAVA\\ga-draw-java\\src\\main\\resources\\me2.jpg",
             Imgcodecs.CV_LOAD_IMAGE_COLOR),
-        new Size(300, 300));
+        new Size(200, 200));
 
     generationViewer.setEnvironment(environment);
     iterations = 10;
     updateView();
     generation.setText("Generation: " + environment.getCurrentGen());
     fitness.setText("Fitness: " + environment.getFitness());
+    mutationRate.setText("Mutation Rate: " + environment.getMutationRate());
+
   }
 
   private void initSlider() {
@@ -138,6 +142,7 @@ public class DrawController {
     public void handle(long now) {
       generation.setText("Generation: " + environment.getCurrentGen());
       fitness.setText("Fitness: " + environment.getFitness());
+      mutationRate.setText("Mutation Rate: " + environment.getMutationRate());
       updateView();
     }
 

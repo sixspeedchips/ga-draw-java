@@ -13,6 +13,7 @@ public class Environment {
   private Mat best;
   private int currentGen;
   private double currentFitness;
+  private double mutationRate;
 
 
   public Environment(Mat raw, Size size) {
@@ -20,7 +21,7 @@ public class Environment {
     currentGen = 0;
     best = Mat.zeros(size, CvType.CV_8SC3);
     Imgproc.resize(raw, target, size, 0, 0, Imgproc.INTER_AREA);
-    generation = Generation.newPool(100, 200, target);
+    generation = Generation.newPool(100, 500, target);
   }
 
 
@@ -29,6 +30,7 @@ public class Environment {
     best = generation.getOrganisms().get(0).getBody();
     currentGen++;
     currentFitness = generation.getOrganisms().get(0).getFitness();
+    mutationRate = generation.getOrganisms().get(0).getMutationRate();
   }
 
   public Mat getBest() {
@@ -46,5 +48,9 @@ public class Environment {
 
   public int getCurrentGen() {
     return currentGen;
+  }
+
+  public double getMutationRate() {
+    return mutationRate;
   }
 }

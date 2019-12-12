@@ -15,7 +15,15 @@
   fx:controller="io.libsoft.gadraw.controller.DrawController">
 
   <HBox>
-
+    <VBox
+      id="labelBox">
+      <Label
+        fx:id="generation"/>
+      <Label
+        fx:id="fitness"/>
+      <Label
+        fx:id="mutationRate"/>
+    </VBox>
     <Button
       onAction="#reset"
       text="Reset"
@@ -50,10 +58,6 @@
 
     </ToggleButton>
 
-    <Label
-      fx:id="generation"/>
-    <Label
-      fx:id="fitness"/>
 
   </HBox>
 

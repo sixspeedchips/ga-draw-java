@@ -4,6 +4,15 @@ VBox {
   -fx-spacing: 10px;
 }
 
+VBox#labelBox {
+  -fx-spacing: -10px;
+  -fx-background-color: lightgrey;
+  -fx-border-color: black;
+  -fx-label-padding: 1px;
+  -fx-pref-height: 50px;
+  -fx-pref-width: 225px;
+  -fx-horizontal-grid-lines-visible: true;
+}
 HBox {
 
   -fx-alignment: center-left;
@@ -13,7 +22,6 @@ HBox {
 
 Label {
   -fx-font-size: 12pt;
-  -fx-font-weight: bold;
 }
 
 Button, ToggleButton {
@@ -30,7 +38,7 @@ Spinner {
 }
 
 Pane#generationContainer {
-  -fx-background-color: grey;
+  -fx-background-color: black;
 }
 
 
